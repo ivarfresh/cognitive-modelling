@@ -49,6 +49,7 @@ t_s = start()
 t_p = [perceptualstep(p_type = 'fast'), perceptualstep(p_type = 'middle'), perceptualstep(p_type = 'slow')]
 t_c = [cognitivestep(c_type = 'fast'), cognitivestep(c_type = 'middle'), cognitivestep(c_type = 'slow')]
 t_m = [motorstep(m_type = 'fast'), motorstep(m_type = 'middle'), motorstep(m_type = 'slow')]
+labels = ["fast", "middle", "slow"]
 
 def example2(completeness = 'extremes'):
     if completeness == 'extremes':
@@ -71,11 +72,11 @@ def example2(completeness = 'extremes'):
     
     elif completeness == 'all':
         output = []
-        for f in t_p:
-            for m in t_c:
-                for s in t_m:
-                  value = f+m+s
-                  #print(f"{f} + {m} + {s} = {value}")
+        for p_index, p in enumerate(t_p):
+            for c_index, c in enumerate(t_c):
+                for m_index, m in enumerate(t_m):
+                  value = p+c+m
+                  print(f"{p} ({labels[p_index]}) + {c} ({labels[c_index]}) + {m} ({labels[m_index]}) = {value}")
                   output.append(value)
                   output.sort()
         
