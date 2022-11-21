@@ -96,7 +96,7 @@ def example2(completeness = 'extremes'):
 # =============================================================================
 # example1()
 # 
-# example2(completeness = 'all')
+example2(completeness = 'all')
 # 
 # =============================================================================
 
@@ -125,35 +125,37 @@ def example2(completeness = 'extremes'):
 #Implement a model that can make fastman, middleman, and slowman
 #predictions similar to example 2.
 
-def example3_and_4(completeness = 'extremes', s2_delay=0):
+def example3(completeness = 'extremes', s2_delay=0):
     
     if completeness == 'extremes':
         
         # 1. everything fast
         #define two stimuli: tp1_f = fast perceptual processing time of stimuli 1, 
         #tp2_f = fast perceptual processing time of stimuli 2
-        tp1_f, tp2_f =  t_p[0], t_p[0]
+        tp_f=  t_p[0]
         
         #defining two time for two coginitive processes: tcc_f = fast cognitive processing time of 
         #comparing stimuli, tcm_f = fast cognitive processing time of preparing motor command
-        tcc_f, tcm_f = t_c[0], t_c[0]
+        tc_f = t_c[0]
         tm_f = t_m[0]
-        time_f = max(tp1_f, s2_delay) + tp2_f + tcc_f + tcm_f + tm_f
+        time_f = max(tp_f, s2_delay) + tp_f + tc_f + tc_f + tm_f
 
         # 2. everything middle
-        tp1_m, tp2_m =  t_p[1], t_p[1]
-        tcc_m, tcm_m = t_c[1], t_c[1] 
+        tp_m =  t_p[1]
+        tc_m = t_c[1] 
         tm_m = t_m[1]
-        time_m = max(tp1_m, s2_delay) + tp2_m + tcc_m + tcm_m + tm_m
+        time_m = max(tp_m, s2_delay) + tp_m + tc_m + tc_m + tm_m
         
         # 3. everything slow
-        tp1_s, tp2_s =  t_p[2], t_p[2]
-        tcc_s, tcm_s = t_c[2], t_c[2]
+        tp_s =  t_p[2]
+        tc_s = t_c[2] 
         tm_s = t_m[2]
-        time_s = max(tp1_s, s2_delay) + tp2_s + tcc_s + tcm_s + tm_s
+        time_m = max(tp_s, s2_delay) + tp_s + tc_s + tc_s + tm_s
         
         #fast perception, middle cognitive, slow motor time
-        B_time = max(tp1_f, s2_delay) + tp2_f + tcc_m + tcm_m + tm_s
+        B_time = max(tp_f, s2_delay) + tp_f + tc_m + tc_m + tm_s
+        
+        
         
            
         
@@ -163,15 +165,29 @@ def example3_and_4(completeness = 'extremes', s2_delay=0):
         print()
         
         return time_f, time_m, time_s  
+        
+    if completeness == "all":
+        for p_index, t_p in enumerate(t_p):
+            for c_index, t_c in enumerate(t_c):
+                for m_index, t_m in enumerate(t_m):
+                  print(f"t_p = {t_p} ({labels[p_index]}) + t_c = {t_c} ({labels[c_index]}) + t_m = {t_m} ({labels[m_index]}) = {value}")
+                  
+                  time = max(t_p, s2_delay) + t_p + t_c + t_c + t_m
+                  print(f"Time = {time}\n")
+        
+                
+        
 
-example3_and_4(completeness = 'extremes', s2_delay = 0) # EXAMPLE 3
+example3(completeness = 'extremes', s2_delay = 0) # EXAMPLE 3
 
 # EXAMPLE 4 is just a modified example 3:
     
-for s2_delay in [40, 80, 110, 150, 210]:
-    print(f">> For stimulus 2 delay of {s2_delay}:")
-    example3_and_4(completeness = 'extremes', s2_delay = s2_delay) 
+def example4():
+    for s2_delay in [40, 80, 110, 150, 210]:
+        print(f">> For stimulus 2 delay of {s2_delay}:")
+        example3(completeness = 'extremes', s2_delay = s2_delay) 
 
+def example5()
 
 
 
