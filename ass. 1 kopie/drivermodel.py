@@ -15,6 +15,7 @@
 ###
 
 import numpy
+from numpy.random import normal 
 
 
 ###
@@ -137,11 +138,15 @@ def velocityCheckForVectors(velocityVectors):
 ## Function to determine lateral velocity (controlled with steering wheel) based on where car is currently positioned. See Janssen & Brumby (2010) for more detailed explanation. Lateral velocity update depends on current position in lane. Intuition behind function: the further away you are, the stronger the correction will be that a human makes
 def vehicleUpdateActiveSteering(LD):
 
-	latVel = 0.2617 * LD*LD + 0.0233 * LD - 0.022
-	returnValue = velocityCheckForVectors(latVel)
-	return returnValue
+    latVel = 0.2617 * LD*LD + 0.0233 * abs(LD) - 0.022
+    
+    if LD > 0:
+        returnValue = -abs(velocityCheckForVectors(latVel))
+    else:
+        returnValue = abs(velocityCheckForVectors(latVel))
 	
-
+    return returnValue
+	
 
 
 ### function to update steering angle in cases where the driver is NOT steering actively (when they are distracted by typing for example)
@@ -163,8 +168,83 @@ def vehicleUpdateNotSteering():
 ### Function to run a trial. Needs to be defined by students (section 2 and 3 of assignment)
 
 def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering=2, interleaving="word"): 
-    print("hello world")
-	
+    resetParameters()
+    
+    locDrifts = [] # this will hold the vaLues of the lane drift OVER TIME
+    trialTime = 0
+    
+    if interleaving == "word": # check if strategy is word
+        trialTime = 0
+        locDrifts.append(startingPositionInLane)
+        
+        # sample typing speed from normal distribution (loc and scal given above)
+        WordsPerMinute = normal(loc = wordsPerMinuteMean, scale = wordsPerMinuteSD)
+        timePerWord = 60000 / WordsPerMinute # time per word in MILISECONDS
+        
+        seconds_per_drift_update = timeStepPerDriftUpdate / 1000 #converting ms to s
+        
+        print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
+        
+        # Loop through sentences
+        
+        for sentence in range(nrSentences):
+            firstWord = True # ms
+            for word in range(nrWordsPerSentence):
+                timeDelta = firstWord * retrievalTimeSentence + retrievalTimeWord + timePerWord
+                trialTime += timeDelta #update 
+                print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
+                firstWord = False # other words in sentence are NOT the first word
+                
+                                
+
+                
+                
+                # CALCULATE CAR'S DRIFT DURING THIS WORD
+                nr_vehicle_updates = int(timeDelta / timeStepPerDriftUpdate)
+                
+                print(f"This means location updated {nr_vehicle_updates} times while typing")
+                
+                for i in range(nr_vehicle_updates):
+                    LatVel = vehicleUpdateNotSteering() #random velocity
+                    locDrifts.append(locDrifts[-1] + LatVel * seconds_per_drift_update)
+                    
+                print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
+                
+                if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT last word of sentence
+                
+                    
+                    
+                    nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
+                    
+                    print(f"The dirver steers between words: {nr_steering_steps} steering steps")
+                    
+                    for step in range(nr_steering_steps):
+                        LD = locDrifts[-1] #current drift location
+                        LatVel = vehicleUpdateActiveSteering(LD) # lat vel based on drift location
+                        
+                        # new drift location
+                        locDrifts.append(locDrifts[-1] + seconds_per_drift_update * LatVel)
+                        
+                    print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
+                    
+                    steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
+                    trialTime += steeringTimeDelta
+                    print(f"{steeringTimeDelta} ms elapsed while steering.")
+                    
+                    
+                    
+                print("")
+                    #Steering update
+                    
+                
+
+        
+        
+        
+    else:
+        pass
+    
+runTrial()
 	
 	
 
