@@ -138,7 +138,7 @@ def example3(completeness = 'extremes'):
         time_f = tp1_f + tp2_f + tcc_f + tcm_f + tm_f
 
         tp1_m, tp2_m =  t_p[1], t_p[1]
-        tcc_m, tcm_m = t_c[1], t_c[1]
+        tcc_m, tcm_m = t_c[1], t_c[1] 
         tm_m = t_m[1]
         time_m = tp1_m + tp2_m + tcc_m + tcm_m + tm_m
         
