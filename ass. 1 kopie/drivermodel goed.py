@@ -189,12 +189,12 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
         # Loop through sentences
         
         for sentence in range(nrSentences):
-            firstWord = True # ms
+            isFirstWord = True # ms
             for word in range(nrWordsPerSentence):
-                timeDelta = firstWord * retrievalTimeSentence + retrievalTimeWord + timePerWord
+                timeDelta = isFirstWord * retrievalTimeSentence + retrievalTimeWord + timePerWord
                 trialTime += timeDelta #update 
                 print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
-                firstWord = False # other words in sentence are NOT the first word
+                isFirstWord = False # other words in sentence are NOT the first word
 
                 
                 # CALCULATE CAR'S DRIFT DURING THIS WORD
@@ -208,7 +208,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                     
                 print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
                 
-                if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT last word of sentence
+                if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT: LAST word of LAST sentence
                     
                     nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
                     
@@ -248,8 +248,48 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
         # Loop through sentences
         
         for sentence in range(nrSentences):
-            firstWord = True # ms
-            timeDelta = firstWord * retrievalTimeSentence          
+            isFirstWord = True # ms
+            for word in range(nrWordsPerSentence):
+                timeDelta = isFirstWord * retrievalTimeSentence + timePerWord
+                trialTime += timeDelta #update 
+                print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
+                isFirstWord = False # other words in sentence are NOT the first word
+
+                
+                # CALCULATE CAR'S DRIFT DURING THIS WORD
+                nr_vehicle_updates = int(timeDelta / timeStepPerDriftUpdate)
+                
+                print(f"This means location updated {nr_vehicle_updates} times while typing")
+                
+                for i in range(nr_vehicle_updates):
+                    LatVel = vehicleUpdateNotSteering() #random velocity
+                    locDrifts.append(locDrifts[-1] + LatVel * seconds_per_drift_update)
+                    
+                print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
+                
+            #after every SENTENCE: steering step    
+            if sentence < nrSentences-1: # if NOT: LAST word of LAST sentence
+                
+                nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
+                
+                print(f"The dirver steers between SENTENCES: {nr_steering_steps} steering steps")
+                
+                for step in range(nr_steering_steps):
+                    LD = locDrifts[-1] #current drift location
+                    LatVel = vehicleUpdateActiveSteering(LD) # lat vel based on drift location
+                    
+                    # new drift location
+                    locDrifts.append(locDrifts[-1] + seconds_per_drift_update * LatVel)
+                    
+                print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
+                
+                steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
+                trialTime += steeringTimeDelta
+                print(f"{steeringTimeDelta} ms elapsed while steering.")
+                    
+                    
+                    
+                print("")
     
     else:
         pass
@@ -270,7 +310,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
 
 
     
-runTrial()
+runTrial(interleaving = "word")
 	
 	
 
