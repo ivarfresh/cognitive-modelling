@@ -233,7 +233,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                     #Steering update
     #interleaving after every sentence
     
-    if interleaving == "sentence": # check if strategy is word
+    if interleaving == "sentence": # check if strategy is sentence
         trialTime = 0
         locDrifts.append(startingPositionInLane)     
         
@@ -272,7 +272,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                 
                 nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
                 
-                print(f"The dirver steers between SENTENCES: {nr_steering_steps} steering steps")
+                print(f"The driver steers between SENTENCES: {nr_steering_steps} steering steps")
                 
                 for step in range(nr_steering_steps):
                     LD = locDrifts[-1] #current drift location
@@ -294,7 +294,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
     else:
         pass
     
-    x = [i*50 for i in range(len(locDrifts))]
+    x = [i*timeStepPerDriftUpdate for i in range(len(locDrifts))]
     y = locDrifts
     drift_mean = mean(locDrifts)
     drift_max = max(locDrifts)
@@ -310,7 +310,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
 
 
     
-runTrial(interleaving = "word")
+runTrial(interleaving = "sentence")
 	
 	
 
