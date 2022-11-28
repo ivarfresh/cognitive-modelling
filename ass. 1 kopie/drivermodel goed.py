@@ -18,7 +18,9 @@ import numpy
 from numpy.random import normal 
 import matplotlib
 from statistics import mean
-
+import random
+import pandas as pd
+from collections import defaultdict
 ###
 ###
 ### Global parameters. These can be called within functions to change (Python: make sure to call GLOBAL)
@@ -168,23 +170,23 @@ def vehicleUpdateNotSteering():
 
 ### Function to run a trial. Needs to be defined by students (section 2 and 3 of assignment)
 
-def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering=2, interleaving="word"): 
+def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering=2, interleaving="word", graph = False, verbose = False): 
     resetParameters()
     
     locDrifts = [] # this will hold the vaLues of the lane drift OVER TIME
+    
     trialTime = 0
+    locDrifts.append(startingPositionInLane)
+    
+    # sample typing speed from normal distribution (loc and scal given above)
+    WordsPerMinute = abs(normal(loc = wordsPerMinuteMean, scale = wordsPerMinuteSD))
+    timePerWord = 60000 / WordsPerMinute # time per word in MILISECONDS
+    
+    seconds_per_drift_update = timeStepPerDriftUpdate / 1000 #converting ms to s
     
     if interleaving == "word": # check if strategy is word
-        trialTime = 0
-        locDrifts.append(startingPositionInLane)
         
-        # sample typing speed from normal distribution (loc and scal given above)
-        WordsPerMinute = normal(loc = wordsPerMinuteMean, scale = wordsPerMinuteSD)
-        timePerWord = 60000 / WordsPerMinute # time per word in MILISECONDS
-        
-        seconds_per_drift_update = timeStepPerDriftUpdate / 1000 #converting ms to s
-        
-        print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
+        if verbose: print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
         
         # Loop through sentences
         
@@ -193,26 +195,26 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
             for word in range(nrWordsPerSentence):
                 timeDelta = isFirstWord * retrievalTimeSentence + retrievalTimeWord + timePerWord
                 trialTime += timeDelta #update 
-                print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
+                if verbose: print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
                 isFirstWord = False # other words in sentence are NOT the first word
 
                 
                 # CALCULATE CAR'S DRIFT DURING THIS WORD
                 nr_vehicle_updates = int(timeDelta / timeStepPerDriftUpdate)
                 
-                print(f"This means location updated {nr_vehicle_updates} times while typing")
+                if verbose: print(f"This means location updated {nr_vehicle_updates} times while typing")
                 
                 for i in range(nr_vehicle_updates):
                     LatVel = vehicleUpdateNotSteering() #random velocity
                     locDrifts.append(locDrifts[-1] + LatVel * seconds_per_drift_update)
                     
-                print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
+                if verbose: print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
                 
                 if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT: LAST word of LAST sentence
                     
                     nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
                     
-                    print(f"The dirver steers between words: {nr_steering_steps} steering steps")
+                    if verbose: print(f"The dirver steers between words: {nr_steering_steps} steering steps")
                     
                     for step in range(nr_steering_steps):
                         LD = locDrifts[-1] #current drift location
@@ -221,29 +223,21 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                         # new drift location
                         locDrifts.append(locDrifts[-1] + seconds_per_drift_update * LatVel)
                         
-                    print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
+                    if verbose: print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
                     
                     steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
                     trialTime += steeringTimeDelta
-                    print(f"{steeringTimeDelta} ms elapsed while steering.")
+                    if verbose: print(f"{steeringTimeDelta} ms elapsed while steering.")
                     
                     
                     
-                print("")
+                if verbose: print("")
                     #Steering update
     #interleaving after every sentence
     
     if interleaving == "sentence": # check if strategy is sentence
-        trialTime = 0
-        locDrifts.append(startingPositionInLane)     
         
-        # sample typing speed from normal distribution (loc and scal given above)
-        WordsPerMinute = normal(loc = wordsPerMinuteMean, scale = wordsPerMinuteSD)
-        timePerWord = 60000 / WordsPerMinute # time per word in MILISECONDS
-        
-        seconds_per_drift_update = timeStepPerDriftUpdate / 1000 #converting ms to s
-        
-        print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
+        if verbose: print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
     
         # Loop through sentences
         
@@ -252,27 +246,27 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
             for word in range(nrWordsPerSentence):
                 timeDelta = isFirstWord * retrievalTimeSentence + timePerWord
                 trialTime += timeDelta #update 
-                print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
+                if verbose: print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
                 isFirstWord = False # other words in sentence are NOT the first word
 
                 
                 # CALCULATE CAR'S DRIFT DURING THIS WORD
                 nr_vehicle_updates = int(timeDelta / timeStepPerDriftUpdate)
                 
-                print(f"This means location updated {nr_vehicle_updates} times while typing")
+                if verbose: print(f"This means location updated {nr_vehicle_updates} times while typing")
                 
                 for i in range(nr_vehicle_updates):
                     LatVel = vehicleUpdateNotSteering() #random velocity
                     locDrifts.append(locDrifts[-1] + LatVel * seconds_per_drift_update)
                     
-                print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
+                if verbose: print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
                 
             #after every SENTENCE: steering step    
             if sentence < nrSentences-1: # if NOT: LAST word of LAST sentence
                 
                 nr_steering_steps = int((steeringUpdateTime * nrSteeringMovementsWhenSteering) / timeStepPerDriftUpdate)
                 
-                print(f"The driver steers between SENTENCES: {nr_steering_steps} steering steps")
+                if verbose: print(f"The driver steers between SENTENCES: {nr_steering_steps} steering steps")
                 
                 for step in range(nr_steering_steps):
                     LD = locDrifts[-1] #current drift location
@@ -281,37 +275,99 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                     # new drift location
                     locDrifts.append(locDrifts[-1] + seconds_per_drift_update * LatVel)
                     
-                print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
+                if verbose: print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
                 
                 steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
                 trialTime += steeringTimeDelta
-                print(f"{steeringTimeDelta} ms elapsed while steering.")
+                if verbose: print(f"{steeringTimeDelta} ms elapsed while steering.")
                     
                     
                     
-                print("")
+                if verbose: print("")
     
-    else:
-        pass
     
-    x = [i*timeStepPerDriftUpdate for i in range(len(locDrifts))]
-    y = locDrifts
+    if interleaving == "drivingOnly": # check if strategy is driving only, so no sentences and word
+
+        
+        if verbose: print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
+    
+        # calculate total time: ASSUME SENTENCE RETRIEVAL TIME BUT NO WORD RETRIEVAL TIME
+        
+        # STEERING HAPPENS OVER SAME TIME INTERVAL AS TOTAL TYPING *WOULD* HAVE TAKEN
+        timeDelta = nrSentences * (retrievalTimeSentence + nrWordsPerSentence * timePerWord) # total "typing time" (no typing happens, just for duration)
+        nr_steering_steps = int(timeDelta / timeStepPerDriftUpdate) # number of steerings teps in this time interval
+        if verbose: print(f"The driver does not type, only steers")
+        
+        for step in range(nr_steering_steps):
+            LD = locDrifts[-1] #current drift location
+            LatVel = vehicleUpdateActiveSteering(LD) # lat vel based on drift location
+            
+            # new drift location
+            locDrifts.append(locDrifts[-1] + seconds_per_drift_update * LatVel)
+            
+        if verbose: print(f"Location updated while steering from {locDrifts[-nr_steering_steps-1]} to {locDrifts[-1]}")
+        
+        steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
+        trialTime += timeDelta
+        if verbose: print(f"{timeDelta} ms elapsed while steering.")
+        
+    
+    if interleaving == "none": # if no steering AT ALL
+        
+        if verbose:
+            print("interleaving: NONE")
+            print(f"Words per minute: {WordsPerMinute}, ms per word: {timePerWord}")
+
+        # Loop through sentences
+        
+        for sentence in range(nrSentences):
+            isFirstWord = True # ms
+            for word in range(nrWordsPerSentence):
+                timeDelta = isFirstWord * retrievalTimeSentence + retrievalTimeWord + timePerWord
+                trialTime += timeDelta #update 
+
+                isFirstWord = False # other words in sentence are NOT the first word
+
+                
+                # CALCULATE CAR'S DRIFT DURING THIS WORD
+                nr_vehicle_updates = int(timeDelta / timeStepPerDriftUpdate)
+                
+                
+                for i in range(nr_vehicle_updates):
+                    LatVel = vehicleUpdateNotSteering() #random velocity
+                    locDrifts.append(locDrifts[-1] + LatVel * seconds_per_drift_update)
+                
+                if verbose:
+                    print(f"Time elapsed typing sentence {sentence}, word {word}: {timeDelta} ms")
+                    print(f"This means location updated {nr_vehicle_updates} times while typing")
+                    print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
+    
+    
+    
+    
     drift_mean = mean(locDrifts)
     drift_max = max(locDrifts)
     
-    matplotlib.pyplot.scatter(x,y, s =5)
-    matplotlib.pyplot.text(1000, drift_max+0.02, f'mean drift: {drift_mean} \ndrift max: {drift_max}\n' \
-                           f'total time: {trialTime}')
+    if graph:
+        
+        x = [i*timeStepPerDriftUpdate for i in range(len(locDrifts))]
+        y = locDrifts
     
-    matplotlib.pyplot.show()
-    print(trialTime)
+        matplotlib.pyplot.scatter(x,y, s =5)
+        matplotlib.pyplot.text(1000, drift_max+0.02, f'mean drift: {drift_mean} \ndrift max: {drift_max}\n' \
+                               f'total time: {trialTime}')
+        
+        matplotlib.pyplot.show()
     
-    #interleaving after every sentence
+    # return vector of four characteristics we will need
+    print(f"Strategy: {interleaving}, trial time: {trialTime}, max drift: {drift_max}, mean drift: {drift_mean}")
+    return trialTime, drift_mean, drift_max, interleaving
+    
 
 
     
 #runTrial(interleaving = "sentence")
-runTrial(nrWordsPerSentence =17,nrSentences=10,nrSteeringMovementsWhenSteering=4, interleaving="word") 
+runTrial(nrWordsPerSentence =17,nrSentences=10,nrSteeringMovementsWhenSteering=4, interleaving="drivingOnly", graph = True) 
 	
 	
 
@@ -319,12 +375,62 @@ runTrial(nrWordsPerSentence =17,nrSentences=10,nrSteeringMovementsWhenSteering=4
 
 
 ### function to run multiple simulations. Needs to be defined by students (section 3 of assignment)
-def runSimulations(nrSims = 100):
-    print("hello world")
+def runSimulations(nrSims = 300):
+    results = defaultdict(list)
+    
+    interleavings = ["word", "sentence", "drivingOnly", "none"]
+    
+    for interleaving in interleavings:
+        for i in range(nrSims):
+            nrWordsPerSentence = random.choice([15,16,17,18,19,20])
+            trialTime, drift_mean, drift_max, interleaving = runTrial(nrWordsPerSentence =nrWordsPerSentence,nrSentences=10,nrSteeringMovementsWhenSteering=4, interleaving=interleaving, graph = False) 
+            
+            results["interleaving"].append(interleaving)
+            results["trialTime"].append(trialTime)
+            results["drift_max"].append(drift_max)
+            results["drift_mean"].append(drift_mean)
+            
+    return pd.DataFrame.from_dict(results)
+
+df = runSimulations()
+
+markers = {"word":"o",
+           "sentence":"x",
+           "drivingOnly":">",
+           "none":"s"}
 
 
+# plot
+fig, ax = matplotlib.pyplot.subplots(figsize=(40,30))
+matplotlib.rcParams.update({'font.size': 22})
 
-	
+
+interleavings = ["word", "sentence", "drivingOnly", "none"]
+
+for interleaving in interleavings: # different markers for each type of interleaving
+    
+    matplotlib.pyplot.scatter(df[df["interleaving"] == interleaving]["trialTime"], 
+                              df[df["interleaving"] == interleaving]["drift_max"], 
+                              label = interleaving,
+                              s = 40, marker  = markers[interleaving],
+                              c = "grey")
+
+# add error bars
+for interleaving in interleavings:
+    meanTime = df[df["interleaving"] == interleaving]["trialTime"].mean()
+    meanTimeError = df[df["interleaving"] == interleaving]["trialTime"].std()
+    
+    meanMaxDrift = df[df["interleaving"] == interleaving]["drift_max"].mean()
+    manMaxDriftError = df[df["interleaving"] == interleaving]["drift_max"].std()
+    print(f"Interleaving {interleaving}, mean time {meanTime}, mean max drift {meanMaxDrift}")
+    
+    matplotlib.pyplot.errorbar(meanTime, meanMaxDrift, xerr=meanTimeError, yerr=manMaxDriftError, capsize = 50)
+    
+    matplotlib.pyplot.scatter(meanTime, meanMaxDrift, s = 450, marker = markers[interleaving],
+                              label = f"{interleaving} average")
+
+ax.legend()
+matplotlib.pyplot.show()
 
 
 
