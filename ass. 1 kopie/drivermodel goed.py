@@ -300,7 +300,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
     drift_max = max(locDrifts)
     
     matplotlib.pyplot.scatter(x,y, s =5)
-    matplotlib.pyplot.text(1000, drift_max+0.02, f'mean drift: {drift_mean} \ndrift max: {drift_max}\n' \
+    matplotlib.pyplot.text(1000, drift_max+0.05, f'mean drift: {drift_mean} \ndrift max: {drift_max}\n' \
                            f'total time: {trialTime}')
     
     matplotlib.pyplot.show()
@@ -311,7 +311,8 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
 
     
 #runTrial(interleaving = "sentence")
-runTrial(nrWordsPerSentence =17,nrSentences=10,nrSteeringMovementsWhenSteering=4, interleaving="word") 
+for i in range(10):
+    runTrial(nrWordsPerSentence =17,nrSentences=10,nrSteeringMovementsWhenSteering=4, interleaving="sentence") 
 	
 	
 
