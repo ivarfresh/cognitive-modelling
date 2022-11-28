@@ -210,7 +210,7 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                     
                 print(f"Location updated while typing from {locDrifts[-nr_vehicle_updates-1]} to {locDrifts[-1]}")
                 
-                if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT last word of sentence
+                if sentence < nrSentences-1 or word < nrWordsPerSentence-1: # if NOT last word of LAST sentence
                 
                     
                     
@@ -230,11 +230,14 @@ def runTrial(nrWordsPerSentence =5,nrSentences=3,nrSteeringMovementsWhenSteering
                     steeringTimeDelta = steeringUpdateTime * nrSteeringMovementsWhenSteering
                     trialTime += steeringTimeDelta
                     print(f"{steeringTimeDelta} ms elapsed while steering.")
-                    
+                
                     
                     
                 print("")
-                    #Steering update
+                
+                
+                    
+                
                     
                 
 
