@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 #defines start time
 def start() -> int: 
@@ -50,6 +51,7 @@ t_p = [perceptualstep(p_type = 'fast'), perceptualstep(p_type = 'middle'), perce
 t_c = [cognitivestep(c_type = 'fast'), cognitivestep(c_type = 'middle'), cognitivestep(c_type = 'slow')]
 t_m = [motorstep(m_type = 'fast'), motorstep(m_type = 'middle'), motorstep(m_type = 'slow')]
 labels = ["fast", "middle", "slow"]
+multiplier = [3,2,0.5]
 
 def example2(completeness = 'extremes'):
     if completeness == 'extremes':
@@ -150,7 +152,7 @@ def example3(completeness = 'extremes', s2_delay=0):
         tp_s =  t_p[2]
         tc_s = t_c[2] 
         tm_s = t_m[2]
-        time_m = max(tp_s, s2_delay) + tp_s + tc_s + tc_s + tm_s
+        time_s = max(tp_s, s2_delay) + tp_s + tc_s + tc_s + tm_s
         
         #fast perception, middle cognitive, slow motor time
         B_time = max(tp_f, s2_delay) + tp_f + tc_m + tc_m + tm_s
@@ -167,18 +169,18 @@ def example3(completeness = 'extremes', s2_delay=0):
         return time_f, time_m, time_s  
         
     if completeness == "all":
-        for p_index, t_p in enumerate(t_p):
-            for c_index, t_c in enumerate(t_c):
-                for m_index, t_m in enumerate(t_m):
-                  print(f"t_p = {t_p} ({labels[p_index]}) + t_c = {t_c} ({labels[c_index]}) + t_m = {t_m} ({labels[m_index]}) = {value}")
+        for p_index, p in enumerate(t_p):
+            for c_index, c in enumerate(t_c):
+                for m_index, m in enumerate(t_m):
+                  print(f"t_p = {p} ({labels[p_index]}) + t_c = {c} ({labels[c_index]}) + t_m = {m}")
                   
-                  time = max(t_p, s2_delay) + t_p + t_c + t_c + t_m
+                  time = max(p, s2_delay) + p + c + c + m
                   print(f"Time = {time}\n")
         
                 
         
 
-example3(completeness = 'extremes', s2_delay = 0) # EXAMPLE 3
+#example3(completeness = 'extremes', s2_delay = 0) # EXAMPLE 3
 
 # EXAMPLE 4 is just a modified example 3:
     
@@ -187,10 +189,40 @@ def example4():
         print(f">> For stimulus 2 delay of {s2_delay}:")
         example3(completeness = 'extremes', s2_delay = s2_delay) 
 
-def example5()
+def example5(completeness = "all", s2_delay=0):
+    e_orig = 0.01
+    e_list = []
+    time_list = []
+    if completeness == "all":
+        for p_index, p in enumerate(t_p):
+            for c_index, c in enumerate(t_c):
+                for m_index, m in enumerate(t_m):
+                    print(f"t_p = {p} ({labels[p_index]}), t_c = {c} ({labels[c_index]}), t_m = {m} ({labels[m_index]})")
+                  
+                    time = max(p, s2_delay) + p + c + c + m
+                    print(f"Time = {time}")
+                    
+                    e_update = e_orig * multiplier[p_index]**2 * multiplier[c_index]**2 * multiplier[m_index]
+                    print(f"error {e_update}\n")
+                    
+                    e_list.append(e_update)
+                    time_list.append(time)
+                    
 
+        #day one, the age and speed of 13 cars:
+        x = np.array(time_list)
+        y = np.array(e_list)
+        plt.scatter(x, y)
+        plt.xlabel("total time (ms)")
+        plt.ylabel("error")
+        #day two, the age and speed of 15 cars:
+        #x = np.array([2,2,8,1,15,8,12,9,7,3,11,4,7,14,12])
+        #y = np.array([100,105,84,105,90,99,90,95,94,100,79,112,91,80,85])
+        #plt.scatter(x, y)
+        
+        plt.show()
 
-
+example5()
 
 
 
