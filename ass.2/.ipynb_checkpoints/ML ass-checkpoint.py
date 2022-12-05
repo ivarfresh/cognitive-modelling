@@ -25,7 +25,7 @@ print(n_response_1)
 #response_inanimate = n_response_1.iloc[44:]
 
 #separate between animate and inanimate responses
-avg_response_animate = n_response_1.iloc[:]['avg']
+avg_response_animate = n_response_1.iloc[:44]['avg']
 avg_response_inanimate = n_response_1.iloc[44:]['avg']
 print(avg_response_animate)
 
