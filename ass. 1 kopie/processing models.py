@@ -189,6 +189,8 @@ def example4():
         print(f">> For stimulus 2 delay of {s2_delay}:")
         example3(completeness = 'extremes', s2_delay = s2_delay) 
 
+example4()
+
 def example5(completeness = "all", s2_delay=0):
     e_orig = 0.01
     e_list = []
@@ -222,7 +224,7 @@ def example5(completeness = "all", s2_delay=0):
         
         plt.show()
 
-example5()
+#example5()
 
 
 
