@@ -32,7 +32,8 @@ def clean_data():
                  i-th participant, j-th query, and k-th repetition
              <2> queryOrder --> the only order we clean data and generate model predictions
     """
-    all_data = glob.glob('all_data/*.csv') # data directory
+    all_data = glob.glob('all_data/*.csv') # data directory #Eduard: jij moet deze directory doen
+    #all_data = glob.glob('all_data/PrEstExp_811_111418_122039*.csv') # data directory
     numPar = len(all_data) # total no. of participants
     print(numPar,' participants were considered!')
     print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++')
@@ -108,7 +109,6 @@ def get_truePr_RF(a,b,c,d):
     truePr.append((c/(a+c)))
     truePr.append((b/(b+d)))
     truePr.append((d/(b+d)))
-
     return truePr
 
 
@@ -152,12 +152,14 @@ def init_fit_RF():
     initialize model fitting practice for Relative Frequency (RF) model
     """
     global testdata
+    totBIC = 0
     print(np.shape(pData))
     bnds = [(0.0, 100), (0.0, 100), (0.0, 100), (0.0, 100),
             (0.0, 100), (0.0, 100), (0.0, 100), (0.0, 100) ]
 
 
-    for ipar in range(84):  # loop through participants
+    #for ipar in range(84):  # loop through participants
+    for ipar in range(1):  # loop through participants
 
         minMSE, n_data, BIC = 0, 0, 0
         n_para = 6  # effective number of parameters: [a,b,c]*2
@@ -175,7 +177,6 @@ def init_fit_RF():
         ### Comment Chris: once you are at the relevant part of the assignment, replace the "=0" with a call to your function that calculates the BIC
         BIC = 0
         totBIC += BIC
-
         print('BIC score of Sampling model:', BIC)
         # model 1,2 = Bayesian sampling (1:one sample size, 2:two sample sizes)
         # model 3   = Sampling/RF
