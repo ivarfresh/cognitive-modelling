@@ -158,8 +158,8 @@ def init_fit_RF():
             (0.0, 100), (0.0, 100), (0.0, 100), (0.0, 100) ]
 
 
-    #for ipar in range(84):  # loop through participants
-    for ipar in range(1):  # loop through participants
+    for ipar in range(84):  # loop through participants #Eduard: deze moet jij gebruiken
+    #for ipar in range(1):  # loop through participants
 
         minMSE, n_data, BIC = 0, 0, 0
         n_para = 6  # effective number of parameters: [a,b,c]*2
